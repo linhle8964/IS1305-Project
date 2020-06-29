@@ -1,0 +1,58 @@
+package com.example.is1305project.adapter;
+
+import android.content.Context;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.bumptech.glide.Glide;
+import com.example.is1305project.R;
+import com.example.is1305project.model.User;
+
+import java.util.List;
+
+public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
+    private Context mContext;
+    private List<User> listUser;
+
+    public UserAdapter(Context mContext, List<User> listUser){
+        this.mContext = mContext;
+        this.listUser = listUser;
+    }
+
+    @NonNull
+    @Override
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType){
+        View view = LayoutInflater.from(mContext).inflate(R.layout.user_item, parent, false);
+        return new UserAdapter.ViewHolder(view);
+    }
+
+    @Override
+    public void onBindViewHolder(@NonNull ViewHolder holder, int position){
+        User user = listUser.get(position);
+        holder.username.setText(user.getUsername());
+        Glide.with(mContext).load(user.getImageURL()).into(holder.profile_image);
+    }
+
+    @Override
+    public int getItemCount(){
+        return listUser.size();
+    }
+
+    public class ViewHolder extends RecyclerView.ViewHolder{
+        public TextView username;
+        public ImageView profile_image;
+
+        public ViewHolder(View itemView){
+            super(itemView);
+
+            username = itemView.findViewById(R.id.username);
+            profile_image = itemView.findViewById(R.id.profile_image);
+        }
+    }
+}
