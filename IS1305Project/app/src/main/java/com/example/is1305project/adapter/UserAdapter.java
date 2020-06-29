@@ -1,6 +1,7 @@
 package com.example.is1305project.adapter;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,6 +12,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.example.is1305project.MessageActivity;
 import com.example.is1305project.R;
 import com.example.is1305project.model.User;
 
@@ -34,9 +36,18 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position){
-        User user = listUser.get(position);
+        final User user = listUser.get(position);
         holder.username.setText(user.getUsername());
         Glide.with(mContext).load(user.getImageURL()).into(holder.profile_image);
+
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(mContext, MessageActivity.class);
+                intent.putExtra("userid", user.getId());
+                mContext.startActivity(intent);
+            }
+        });
     }
 
     @Override
