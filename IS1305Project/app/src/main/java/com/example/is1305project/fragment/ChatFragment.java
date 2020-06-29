@@ -90,7 +90,7 @@ public class ChatFragment extends Fragment {
                 for(DataSnapshot dataSnapshot : snapshot.getChildren()){
                     User user = dataSnapshot.getValue(User.class);
 
-                    for(String id : userList){
+                    /*for(String id : userList){
                         if(user.getId().equals(id)){
                             if(listUser.size() != 0){
                                 for(User myUser : listUser){
@@ -102,7 +102,7 @@ public class ChatFragment extends Fragment {
                                 listUser.add(user);
                             }
                         }
-                    }
+                    }*/
                 }
                 chatAdapter = new ChatAdapter(getContext(), listUser);
                 recyclerView.setAdapter(chatAdapter);
