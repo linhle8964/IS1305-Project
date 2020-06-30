@@ -29,38 +29,6 @@ public class ProfileActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle("Profile");
 
-        GoogleSignInOptions googleSignInOptions = new GoogleSignInOptions
-                .Builder()
-                .requestIdToken(getString(R.string.default_web_client_id))
-                .requestEmail()
-                .build();
-
-        mGoogleSignInClient = GoogleSignIn.getClient(this, googleSignInOptions);
     }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.mymenu, menu);
-        return super.onCreateOptionsMenu(menu);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        switch (item.getItemId()){
-            case R.id.mnLogout:
-                Toast.makeText(ProfileActivity.this, "Log Out", Toast.LENGTH_SHORT).show();
-                FirebaseAuth.getInstance().signOut();
-                final Intent intent = new Intent(this, MainActivity.class);
-                mGoogleSignInClient.signOut().addOnCompleteListener(this, new OnCompleteListener<Void>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Void> task) {
-                        startActivity(intent);
-                        finish();
-                    }
-                });
-
-                break;
-        }
-        return super.onOptionsItemSelected(item);
-    }
 }

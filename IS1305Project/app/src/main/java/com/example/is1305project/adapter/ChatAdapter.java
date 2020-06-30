@@ -122,8 +122,8 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
         public TextView username;
         public ImageView profile_image;
         public TextView lastMessage;
-        private ImageView imageOn;
-        private ImageView imageOff;
+        public ImageView imageOn;
+        public ImageView imageOff;
         public LinearLayout linearLayout;
         public TextView lastMessageTime;
 

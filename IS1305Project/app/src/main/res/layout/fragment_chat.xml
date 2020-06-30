@@ -5,8 +5,16 @@
     android:layout_height="match_parent"
     tools:context=".fragment.ChatFragment">
 
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="5dp"
+        android:hint="Search Conversation..."
+        android:id="@+id/search_conversation"/>
+
     <androidx.recyclerview.widget.RecyclerView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:layout_below="@+id/search_conversation"
         android:id="@+id/recycler_view"/>
 </RelativeLayout>

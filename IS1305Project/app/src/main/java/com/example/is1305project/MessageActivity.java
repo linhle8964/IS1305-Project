@@ -8,6 +8,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -18,6 +20,8 @@ import com.bumptech.glide.Glide;
 import com.example.is1305project.adapter.MessageAdapter;
 import com.example.is1305project.model.Chat;
 import com.example.is1305project.model.User;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -57,12 +61,12 @@ public class MessageActivity extends AppCompatActivity {
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle("");
-        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+        /*toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 startActivity(new Intent(getApplicationContext(), MainActivity.class).setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
             }
-        });
+        });*/
 
         // show message box
         profileImage = findViewById(R.id.profile_image);
@@ -130,29 +134,6 @@ public class MessageActivity extends AppCompatActivity {
         // add user to chat fragment
         addToChatList(firebaseUser.getUid(), userid, currentTime);
         addToChatList(userid, firebaseUser.getUid(), currentTime);
-        /*final DatabaseReference chatRef = FirebaseDatabase.getInstance().getReference("Chatlist")
-                .child(firebaseUser.getUid())
-                .child(userid);
-
-        chatRef.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if(!snapshot.exists()){
-                    HashMap<String, Object> chatListHashMap = new HashMap<>();
-                    chatListHashMap.put("id", userid);
-                    chatListHashMap.put("time", currentTime);
-                    chatRef.setValue(chatListHashMap);
-                }else{
-                    chatRef.child("time").setValue(currentTime);
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });*/
-
     }
 
     private void addToChatList(String sender, final String receiver, final Long currentTime){
@@ -216,7 +197,7 @@ public class MessageActivity extends AppCompatActivity {
         reference.updateChildren(hashMap);
     }
 
-    /*@Override
+    @Override
     protected void onResume() {
         super.onResume();
         status("online");
@@ -226,5 +207,22 @@ public class MessageActivity extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         status("offline");
-    }*/
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.message_menu, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        switch (item.getItemId()){
+            case R.id.mn_friend_profile:
+                Intent profileIntent = new Intent(this, ProfileActivity.class);
+                startActivity(profileIntent);
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
 }

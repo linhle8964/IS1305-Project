@@ -101,10 +101,6 @@ public class ChatFragment extends Fragment {
                         }
                     }
                 }
-                for(DataSnapshot dataSnapshot : snapshot.getChildren()){
-                    User user = dataSnapshot.getValue(User.class);
-
-                }
                 chatAdapter = new ChatAdapter(getContext(), listUser, true);
                 recyclerView.setAdapter(chatAdapter);
             }
