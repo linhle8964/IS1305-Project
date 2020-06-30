@@ -161,6 +161,7 @@ public class StartActivity extends AppCompatActivity {
                                         hashMap.put("username", username);
                                         hashMap.put("email", user.getEmail());
                                         hashMap.put("phoneNumber", phoneNumber);
+                                        hashMap.put("status", "offline");
                                         hashMap.put("imageURL", profileUri.toString());
                                         reference.setValue(hashMap);
                                         updateUI(user);

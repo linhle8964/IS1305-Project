@@ -60,6 +60,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
         DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Chats");
         final List<Chat> userChatHistory = new ArrayList<>();
         reference.addValueEventListener(new ValueEventListener() {
+            @RequiresApi(api = Build.VERSION_CODES.O)
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 for(DataSnapshot dataSnapshot : snapshot.getChildren()){
@@ -86,18 +87,21 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
             }
         });
 
-        if(isChat){
-            if(user.getStatus().equals("online")){
-                holder.imageOn.setVisibility(View.VISIBLE);
-                holder.imageOff.setVisibility(View.GONE);
+        if(user.getStatus() != null){
+            if(isChat){
+                if(user.getStatus().equals("online")){
+                    holder.imageOn.setVisibility(View.VISIBLE);
+                    holder.imageOff.setVisibility(View.GONE);
+                }else{
+                    holder.imageOn.setVisibility(View.GONE);
+                    holder.imageOff.setVisibility(View.VISIBLE);
+                }
             }else{
                 holder.imageOn.setVisibility(View.GONE);
-                holder.imageOff.setVisibility(View.VISIBLE);
+                holder.imageOff.setVisibility(View.GONE);
             }
-        }else{
-            holder.imageOn.setVisibility(View.GONE);
-            holder.imageOff.setVisibility(View.GONE);
         }
+
 
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
