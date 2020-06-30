@@ -64,7 +64,7 @@ public class ContactFragment extends Fragment {
                     }
                 }
 
-                userAdapter = new UserAdapter(getContext(), listUser);
+                userAdapter = new UserAdapter(getContext(), listUser, false);
                 recyclerView.setAdapter(userAdapter);
             }
 

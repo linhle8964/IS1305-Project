@@ -136,7 +136,6 @@ public class StartActivity extends AppCompatActivity {
                                     }
 
                                     if(user != null && checkExist[0] == false){
-                                        System.out.println("Check: " + checkExist[0]);
                                         String username = user.getDisplayName();
                                         Uri profileUri = user.getPhotoUrl();
                                         String phoneNumber = user.getPhoneNumber();
@@ -193,40 +192,10 @@ public class StartActivity extends AppCompatActivity {
 
     private void updateUI(FirebaseUser user){
         if(user != null){
-            Intent intent = new Intent(this, MainActivity.class);
+            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
             startActivity(intent);
             finish();
         }
     }
 
-    private void getAllUser(FirebaseUser user){
-        DatabaseReference myReference = FirebaseDatabase.getInstance().getReference("Users");
-
-        myReference.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                for(DataSnapshot dataSnapshot : snapshot.getChildren()){
-                    User user = dataSnapshot.getValue(User.class);
-                    listUser.add(user);
-                }
-
-
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
-    }
-
-    private boolean checkUserExist(FirebaseUser firebaseUser){
-        boolean exist = false;
-        for(User user : listUser){
-            if(firebaseUser.getUid().equals(user.getId())){
-                exist = true;
-            }
-        }
-        return exist;
-    }
 }

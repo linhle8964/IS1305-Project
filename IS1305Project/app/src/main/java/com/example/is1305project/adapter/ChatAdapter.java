@@ -2,13 +2,16 @@ package com.example.is1305project.adapter;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
@@ -22,17 +25,24 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.text.Format;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
     private Context mContext;
     private List<User> listUser;
+    private boolean isChat;
 
-    public ChatAdapter(Context mContext, List<User> listUser){
+    public ChatAdapter(Context mContext, List<User> listUser, boolean isChat){
         this.mContext = mContext;
         this.listUser = listUser;
+        this.isChat = isChat;
     }
 
     @NonNull
@@ -58,12 +68,14 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
                         userChatHistory.add(chat);
                     }
                 }
-                holder.lastMessage.setVisibility(View.VISIBLE);
+                holder.linearLayout.setVisibility(View.VISIBLE);
                 Collections.sort(userChatHistory);
                 if(userChatHistory.size() == 0){
                     holder.lastMessage.setText("");
+                    holder.lastMessageTime.setText("");
                 }else{
                     holder.lastMessage.setText(userChatHistory.get(userChatHistory.size() - 1).getMessage());
+                    holder.lastMessageTime.setText(convertTime(userChatHistory.get(userChatHistory.size() - 1).getTime()));
                 }
 
             }
@@ -73,6 +85,20 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
 
             }
         });
+
+        if(isChat){
+            if(user.getStatus().equals("online")){
+                holder.imageOn.setVisibility(View.VISIBLE);
+                holder.imageOff.setVisibility(View.GONE);
+            }else{
+                holder.imageOn.setVisibility(View.GONE);
+                holder.imageOff.setVisibility(View.VISIBLE);
+            }
+        }else{
+            holder.imageOn.setVisibility(View.GONE);
+            holder.imageOff.setVisibility(View.GONE);
+        }
+
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -92,12 +118,38 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
         public TextView username;
         public ImageView profile_image;
         public TextView lastMessage;
+        private ImageView imageOn;
+        private ImageView imageOff;
+        public LinearLayout linearLayout;
+        public TextView lastMessageTime;
 
         public ViewHolder(View itemView){
             super(itemView);
             lastMessage = itemView.findViewById(R.id.last_message);
             username = itemView.findViewById(R.id.username);
             profile_image = itemView.findViewById(R.id.profile_image);
+            imageOn = itemView.findViewById(R.id.image_on);
+            imageOff = itemView.findViewById(R.id.image_off);
+            linearLayout = itemView.findViewById(R.id.last_message_info);
+            lastMessageTime = itemView.findViewById(R.id.last_message_time);
+        }
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    private String convertTime(long time){
+        Date date = new Date(time);
+        LocalDateTime currentDate = LocalDateTime.now();
+        if(date.getDate() == currentDate.getDayOfMonth()){
+            Format format = new SimpleDateFormat("HH:mm");
+            return format.format(date);
+        }else{
+            if(date.getYear() - currentDate.getYear() > 0){
+                Format format = new SimpleDateFormat("yyyy/MM/dd ");
+                return format.format(date);
+            }else{
+                Format format = new SimpleDateFormat("MM/dd ");
+                return format.format(date);
+            }
         }
     }
 }

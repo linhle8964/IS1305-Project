@@ -44,6 +44,7 @@ public class MessageActivity extends AppCompatActivity {
     private EditText textSend;
     private ImageButton btnSend;
 
+    private String userid;
     private MessageAdapter messageAdapter;
     private List<Chat> listChat;
     private RecyclerView recyclerView;
@@ -59,7 +60,7 @@ public class MessageActivity extends AppCompatActivity {
         toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                finish();
+                startActivity(new Intent(getApplicationContext(), MainActivity.class).setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
             }
         });
 
@@ -70,7 +71,7 @@ public class MessageActivity extends AppCompatActivity {
         btnSend = findViewById(R.id.btn_send);
 
         intent = getIntent();
-        final String userid = intent.getStringExtra("userid");
+        userid = intent.getStringExtra("userid");
 
         firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
         reference = FirebaseDatabase.getInstance().getReference("Users").child(userid);
@@ -93,8 +94,9 @@ public class MessageActivity extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 User user = snapshot.getValue(User.class);
+
                 username.setText(user.getUsername());
-                Glide.with(MessageActivity.this).load(user.getImageURL()).into(profileImage);
+                Glide.with(getApplicationContext()).load(user.getImageURL()).into(profileImage);
 
                 readMessage(firebaseUser.getUid(), userid, user.getImageURL());
             }
@@ -116,14 +118,67 @@ public class MessageActivity extends AppCompatActivity {
 
     private void sendMessage(String sender, String receiver, String message){
         DatabaseReference reference = FirebaseDatabase.getInstance().getReference();
-
+        final long currentTime = System.currentTimeMillis();
         HashMap<String, Object> hashMap = new HashMap<>();
         hashMap.put("sender", sender);
         hashMap.put("receiver", receiver);
         hashMap.put("message", message);
-        hashMap.put("time", System.currentTimeMillis());
+        hashMap.put("time", currentTime);
 
         reference.child("Chats").push().setValue(hashMap);
+
+        // add user to chat fragment
+        addToChatList(firebaseUser.getUid(), userid, currentTime);
+        addToChatList(userid, firebaseUser.getUid(), currentTime);
+        /*final DatabaseReference chatRef = FirebaseDatabase.getInstance().getReference("Chatlist")
+                .child(firebaseUser.getUid())
+                .child(userid);
+
+        chatRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if(!snapshot.exists()){
+                    HashMap<String, Object> chatListHashMap = new HashMap<>();
+                    chatListHashMap.put("id", userid);
+                    chatListHashMap.put("time", currentTime);
+                    chatRef.setValue(chatListHashMap);
+                }else{
+                    chatRef.child("time").setValue(currentTime);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });*/
+
+    }
+
+    private void addToChatList(String sender, final String receiver, final Long currentTime){
+        // add user to chat fragment
+        final DatabaseReference chatRef = FirebaseDatabase.getInstance().getReference("Chatlist")
+                .child(sender)
+                .child(receiver);
+
+        chatRef.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if(!snapshot.exists()){
+                    HashMap<String, Object> chatListHashMap = new HashMap<>();
+                    chatListHashMap.put("id", receiver);
+                    chatListHashMap.put("time", currentTime);
+                    chatRef.setValue(chatListHashMap);
+                }else{
+                    chatRef.child("time").setValue(currentTime);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
     }
 
     private void readMessage(final String myid, final String userid, final String imageURL){
@@ -152,4 +207,24 @@ public class MessageActivity extends AppCompatActivity {
             }
         });
     }
+
+    private void status(String status){
+        reference = FirebaseDatabase.getInstance().getReference("Users").child(firebaseUser.getUid());
+
+        HashMap<String, Object> hashMap = new HashMap<>();
+        hashMap.put("status", status);
+        reference.updateChildren(hashMap);
+    }
+
+    /*@Override
+    protected void onResume() {
+        super.onResume();
+        status("online");
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        status("offline");
+    }*/
 }

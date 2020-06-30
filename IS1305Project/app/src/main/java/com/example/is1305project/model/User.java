@@ -7,16 +7,18 @@ public class User implements Serializable {
     private String username;
     private String email;
     private String imageURL;
+    private String status;
 
     public User(){
 
     }
 
-    public User(String id, String username, String email, String imageURL) {
+    public User(String id, String username, String email, String imageURL, String status) {
         this.id = id;
         this.username = username;
         this.email = email;
         this.imageURL = imageURL;
+        this.status = status;
     }
 
     public String getId() {
@@ -51,13 +53,11 @@ public class User implements Serializable {
         this.imageURL = imageURL;
     }
 
-    @Override
-    public String toString() {
-        return "User{" +
-                "userId='" + id + '\'' +
-                ", username='" + username + '\'' +
-                ", email='" + email + '\'' +
-                ", imageURL='" + imageURL + '\'' +
-                '}';
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 }
