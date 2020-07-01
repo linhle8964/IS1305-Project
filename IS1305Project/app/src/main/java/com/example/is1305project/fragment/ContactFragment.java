@@ -18,6 +18,7 @@ import android.widget.EditText;
 
 import com.example.is1305project.R;
 import com.example.is1305project.adapter.UserAdapter;
+import com.example.is1305project.function.VNCharacterUtils;
 import com.example.is1305project.model.ChatList;
 import com.example.is1305project.model.User;
 import com.google.firebase.auth.FirebaseAuth;
@@ -161,7 +162,8 @@ public class ContactFragment extends Fragment {
                     Collections.sort(listUser, new Comparator<User>() {
                         @Override
                         public int compare(User o1, User o2) {
-                            return o1.getUsername().compareTo(o2.getUsername());
+                            return VNCharacterUtils.removeAccent(o1.getUsername())
+                                    .compareTo(VNCharacterUtils.removeAccent(o2.getUsername()));
                         }
                     });
 

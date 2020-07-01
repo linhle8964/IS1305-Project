@@ -41,17 +41,19 @@ public class MessageActivity extends AppCompatActivity {
     private CircleImageView profileImage;
     private TextView username;
 
-    private FirebaseUser firebaseUser;
+    private FirebaseUser firebaseUser; // user cua minh
     private DatabaseReference reference;
     private Intent intent;
     private Toolbar toolbar;
     private EditText textSend;
     private ImageButton btnSend;
 
-    private String userid;
+    private String userid; // user id cua nguoi minh dang chat
     private MessageAdapter messageAdapter;
     private List<Chat> listChat;
     private RecyclerView recyclerView;
+
+    private ValueEventListener seenListener;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -118,6 +120,29 @@ public class MessageActivity extends AppCompatActivity {
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(getApplicationContext());
         linearLayoutManager.setStackFromEnd(true);
         recyclerView.setLayoutManager(linearLayoutManager);
+        seenMessage(userid);
+    }
+
+    private void seenMessage(final String userid){
+        reference = FirebaseDatabase.getInstance().getReference("Chats");
+        seenListener = reference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                for (DataSnapshot dataSnapshot : snapshot.getChildren()){
+                    Chat chat = dataSnapshot.getValue(Chat.class);
+                    if(chat.getReceiver().equals(firebaseUser.getUid()) && chat.getSender().equals(userid)){
+                        HashMap<String, Object> hashMap = new HashMap<>();
+                        hashMap.put("isSeen", true);
+                        dataSnapshot.getRef().updateChildren(hashMap);
+                    }
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
     }
 
     private void sendMessage(String sender, String receiver, String message){
@@ -128,6 +153,7 @@ public class MessageActivity extends AppCompatActivity {
         hashMap.put("receiver", receiver);
         hashMap.put("message", message);
         hashMap.put("time", currentTime);
+        hashMap.put("isSeen", false);
 
         reference.child("Chats").push().setValue(hashMap);
 
@@ -206,6 +232,9 @@ public class MessageActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
+        if(seenListener != null && reference != null    ){
+            reference.removeEventListener(seenListener);
+        }
         status("offline");
     }
 

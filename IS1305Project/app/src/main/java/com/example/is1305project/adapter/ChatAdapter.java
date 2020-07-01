@@ -2,6 +2,8 @@ package com.example.is1305project.adapter;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.Build;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -59,7 +61,8 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
         Glide.with(mContext).load(user.getImageURL()).into(holder.profile_image);
         DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Chats");
         final List<Chat> userChatHistory = new ArrayList<>();
-        reference.addValueEventListener(new ValueEventListener() {
+        final boolean[] isNotSeen = {false};
+        reference.addListenerForSingleValueEvent(new ValueEventListener() {
             @RequiresApi(api = Build.VERSION_CODES.O)
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -68,6 +71,15 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
                     if(user.getId().equals(chat.getSender()) || user.getId().equals(chat.getReceiver())){
                         userChatHistory.add(chat);
                     }
+
+                    // check if chat have any unseen message. If not change color to black
+                    if(!chat.isIsSeen() && isNotSeen[0] == false && chat.getSender().equals(user.getId())){
+                        holder.username.setTextColor(Color.BLACK);
+                        holder.username.setTypeface(null, Typeface.BOLD);
+                        holder.lastMessage.setTextColor(Color.BLACK);
+                        holder.lastMessage.setTypeface(null, Typeface.BOLD);
+                        isNotSeen[0] = true;
+                    }
                 }
                 holder.linearLayout.setVisibility(View.VISIBLE);
                 Collections.sort(userChatHistory);
@@ -75,7 +87,11 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
                     holder.lastMessage.setText("");
                     holder.lastMessageTime.setText("");
                 }else{
-                    holder.lastMessage.setText(fixLastMessage(userChatHistory.get(userChatHistory.size() - 1).getMessage()));
+                    String isSender = "";
+                    if(userChatHistory.get(userChatHistory.size() - 1).getReceiver().equals(user.getId())){
+                        isSender += "You: ";
+                    }
+                    holder.lastMessage.setText(isSender + fixLastMessage(userChatHistory.get(userChatHistory.size() - 1).getMessage()));
                     holder.lastMessageTime.setText(convertTime(userChatHistory.get(userChatHistory.size() - 1).getTime()));
                 }
 
@@ -87,6 +103,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
             }
         });
 
+        // set actice icon
         if(user.getStatus() != null){
             if(isChat){
                 if(user.getStatus().equals("online")){
