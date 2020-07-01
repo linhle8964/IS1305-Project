@@ -95,7 +95,8 @@ public class ChatFragment extends Fragment {
                         }
                     }
                 }
-                chatAdapter.notifyDataSetChanged();
+                chatAdapter = new ChatAdapter(getContext(), listUser, true);
+                recyclerView.setAdapter(chatAdapter);
             }
 
             @Override

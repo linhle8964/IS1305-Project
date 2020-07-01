@@ -75,7 +75,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
                     holder.lastMessage.setText("");
                     holder.lastMessageTime.setText("");
                 }else{
-                    holder.lastMessage.setText(userChatHistory.get(userChatHistory.size() - 1).getMessage());
+                    holder.lastMessage.setText(fixLastMessage(userChatHistory.get(userChatHistory.size() - 1).getMessage()));
                     holder.lastMessageTime.setText(convertTime(userChatHistory.get(userChatHistory.size() - 1).getTime()));
                 }
 
@@ -155,5 +155,13 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
                 return format.format(date);
             }
         }
+    }
+
+    private String fixLastMessage(String message){
+        message = message.replaceAll("\n+", " ");
+        if(message.length() >= 25){
+            message = message.substring(0, 24) + "...";
+        }
+        return message;
     }
 }
