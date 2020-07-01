@@ -221,6 +221,7 @@ public class MessageActivity extends AppCompatActivity {
             case R.id.mn_friend_profile:
                 Intent profileIntent = new Intent(this, ProfileActivity.class);
                 startActivity(profileIntent);
+                finish();
                 return true;
         }
         return super.onOptionsItemSelected(item);
