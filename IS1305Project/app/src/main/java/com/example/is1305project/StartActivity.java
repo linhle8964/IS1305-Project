@@ -166,7 +166,6 @@ public class StartActivity extends AppCompatActivity {
                                         reference.setValue(hashMap);
                                         updateUI(user);
                                     }else{
-                                        System.out.println("Check: " + checkExist[0]);
                                         updateUI(user);
                                     }
                                 }
@@ -193,7 +192,8 @@ public class StartActivity extends AppCompatActivity {
 
     private void updateUI(FirebaseUser user){
         if(user != null){
-            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+            Intent intent = new Intent(this, MainActivity.class);
+            intent.putExtra("isLogin", true);
             startActivity(intent);
             finish();
         }

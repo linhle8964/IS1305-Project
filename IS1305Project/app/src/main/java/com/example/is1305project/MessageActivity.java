@@ -226,7 +226,7 @@ public class MessageActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        status("online");
+       // status("online");
     }
 
     @Override
@@ -235,7 +235,7 @@ public class MessageActivity extends AppCompatActivity {
         if(seenListener != null && reference != null    ){
             reference.removeEventListener(seenListener);
         }
-        status("offline");
+        //status("offline");
     }
 
     @Override
@@ -254,5 +254,19 @@ public class MessageActivity extends AppCompatActivity {
                 return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onBackPressed() {
+
+        int count = getSupportFragmentManager().getBackStackEntryCount();
+
+        if (count == 0) {
+            super.onBackPressed();
+            //additional code
+        } else {
+            getSupportFragmentManager().popBackStack();
+        }
+
     }
 }

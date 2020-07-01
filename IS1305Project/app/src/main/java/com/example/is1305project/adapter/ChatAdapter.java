@@ -62,6 +62,23 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
         DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Chats");
         final List<Chat> userChatHistory = new ArrayList<>();
         final boolean[] isNotSeen = {false};
+
+        // set active icon
+        if(user.getStatus() != null){
+            if(isChat){
+                if(user.getStatus().equals("online")){
+                    holder.imageOn.setVisibility(View.VISIBLE);
+                    holder.imageOff.setVisibility(View.GONE);
+                }else{
+                    holder.imageOn.setVisibility(View.GONE);
+                    holder.imageOff.setVisibility(View.VISIBLE);
+                }
+            }else{
+                holder.imageOn.setVisibility(View.GONE);
+                holder.imageOff.setVisibility(View.GONE);
+            }
+        }
+
         reference.addListenerForSingleValueEvent(new ValueEventListener() {
             @RequiresApi(api = Build.VERSION_CODES.O)
             @Override
@@ -74,6 +91,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
 
                     // check if chat have any unseen message. If not change color to black
                     if(!chat.isIsSeen() && isNotSeen[0] == false && chat.getSender().equals(user.getId())){
+                        System.out.println(isNotSeen[0]);
                         holder.username.setTextColor(Color.BLACK);
                         holder.username.setTypeface(null, Typeface.BOLD);
                         holder.lastMessage.setTextColor(Color.BLACK);
@@ -103,21 +121,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
             }
         });
 
-        // set actice icon
-        if(user.getStatus() != null){
-            if(isChat){
-                if(user.getStatus().equals("online")){
-                    holder.imageOn.setVisibility(View.VISIBLE);
-                    holder.imageOff.setVisibility(View.GONE);
-                }else{
-                    holder.imageOn.setVisibility(View.GONE);
-                    holder.imageOff.setVisibility(View.VISIBLE);
-                }
-            }else{
-                holder.imageOn.setVisibility(View.GONE);
-                holder.imageOff.setVisibility(View.GONE);
-            }
-        }
+
 
 
         holder.itemView.setOnClickListener(new View.OnClickListener() {

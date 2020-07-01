@@ -4,16 +4,13 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -49,6 +46,8 @@ public class MainActivity extends AppCompatActivity {
     private DatabaseReference reference;
     private FirebaseUser firebaseUser;
     private Intent intent;
+    private boolean isLogin;
+    private boolean example = true;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -57,6 +56,7 @@ public class MainActivity extends AppCompatActivity {
         bottomNavigationView = (BottomNavigationView) findViewById(R.id.bottom_navigation);
         firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
         intent = getIntent();
+        isLogin = intent.getBooleanExtra("isLogin", false);
         status("online");
         // set default
         loadFragment(new ChatFragment());
@@ -129,7 +129,7 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(this, "Log Out", Toast.LENGTH_SHORT).show();
                 FirebaseAuth.getInstance().signOut();
                 status("offline");
-                final Intent intent = new Intent(getApplicationContext(), StartActivity.class);
+                final Intent intent = new Intent(MainActivity.this, StartActivity.class);
                 mGoogleSignInClient.signOut().addOnCompleteListener(this, new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
@@ -156,16 +156,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
-
-        int count = getSupportFragmentManager().getBackStackEntryCount();
-
-        if (count == 0) {
-            super.onBackPressed();
-            //additional code
-        } else {
-            getSupportFragmentManager().popBackStack();
-        }
-
+        super.onBackPressed();
     }
 
     private void status(String status){
@@ -179,4 +170,17 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+   /* @Override
+    protected void onResume() {
+        status("active");
+        super.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        example = false;
+        System.out.println(example);
+        super.onPause();
+
+    }*/
 }
