@@ -9,9 +9,13 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.text.Editable;
+import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 
 import com.example.is1305project.R;
 import com.example.is1305project.adapter.ChatAdapter;
@@ -35,12 +39,13 @@ import java.util.List;
 
 public class ChatFragment extends Fragment {
     private RecyclerView recyclerView;
-
+    private EditText search_conversation;
     private ChatAdapter chatAdapter;
-    private List<User> listUser;
     private FirebaseUser firebaseUser;
     private DatabaseReference reference;
-    private List<ChatList> userList;
+    private ArrayList<User> listUser = new ArrayList<>();
+    private ArrayList<User> listUserSave = new ArrayList<>();
+    private ArrayList<ChatList> userList = new ArrayList<>();
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -48,13 +53,12 @@ public class ChatFragment extends Fragment {
         // Inflate the layout for this fragment
         View view =  inflater.inflate(R.layout.fragment_chat, container, false);
 
+        search_conversation = view.findViewById(R.id.search_conversation);
         recyclerView = view.findViewById(R.id.recycler_view);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
 
         firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
-
-        userList = new ArrayList<>();
 
         reference = FirebaseDatabase.getInstance().getReference("Chatlist").child(firebaseUser.getUid());
         reference.addValueEventListener(new ValueEventListener() {
@@ -73,11 +77,36 @@ public class ChatFragment extends Fragment {
 
             }
         });
+        search_conversation.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                listUser.clear();
+                if(TextUtils.isEmpty(s)){
+                    listUser.addAll(listUserSave);
+                }else {
+                    for (User user : listUserSave){
+                        if (user.getUsername().toLowerCase().contains(s.toString().toLowerCase())){
+                            listUser.add(user);
+                        }
+                    }
+                }
+                chatAdapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
         return view;
     }
 
     private void chatList(){
-        listUser = new ArrayList<>();
         final FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
         reference = FirebaseDatabase.getInstance().getReference("Users");
         reference.addValueEventListener(new ValueEventListener() {
@@ -101,6 +130,7 @@ public class ChatFragment extends Fragment {
                         }
                     }
                 }
+                listUserSave.addAll(listUser);
                 chatAdapter = new ChatAdapter(getContext(), listUser, true);
                 recyclerView.setAdapter(chatAdapter);
             }
