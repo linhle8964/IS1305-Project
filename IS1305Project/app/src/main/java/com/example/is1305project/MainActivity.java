@@ -140,6 +140,7 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             case  R.id.mnProfile:
                 Intent profileIntent = new Intent(this,ProfileActivity.class);
+                profileIntent.putExtra("userid",firebaseUser.getUid());
                 startActivity(profileIntent);
                 return true;
         }

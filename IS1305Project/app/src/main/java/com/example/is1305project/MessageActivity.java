@@ -220,6 +220,8 @@ public class MessageActivity extends AppCompatActivity {
         switch (item.getItemId()){
             case R.id.mn_friend_profile:
                 Intent profileIntent = new Intent(this, ProfileActivity.class);
+profileIntent.putExtra("userid",userid);
+                System.out.println(userid);
                 startActivity(profileIntent);
                 finish();
                 return true;

@@ -72,6 +72,8 @@ public class ProfileActivity extends AppCompatActivity {
     private String camerapermission[];
     private String storagepermission[];
     private Uri image_uri;
+    private String otheruserid;
+    private Intent intent;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,7 +85,8 @@ public class ProfileActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle("Profile");
         database = FirebaseDatabase.getInstance();
-
+        intent = getIntent();
+        String userid = intent.getStringExtra("userid");
         reference = database.getReference("Users");
         storage = FirebaseStorage.getInstance().getReference();
         camerapermission = new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE};
@@ -92,31 +95,71 @@ public class ProfileActivity extends AppCompatActivity {
         nameTV = findViewById(R.id.NameTV);
         EmailTV = findViewById(R.id.EmailTV);
         fab = findViewById(R.id.fab);
+
         pd = new ProgressDialog(getApplicationContext());
-        Query query = reference.orderByChild("email").equalTo(user.getEmail());
-        query.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                for (DataSnapshot ds : snapshot.getChildren()) {
-                    String name = "" + ds.child("username").getValue();
-                    String email = "" + ds.child("email").getValue();
-                    String image = "" + ds.child("imageURL").getValue();
-                    nameTV.setText(name);
-                    EmailTV.setText(email);
-                    try {
-                        Picasso.get().load(image).into(avatar);
-                    } catch (Exception e) {
-                        Picasso.get().load(R.drawable.ic_add_image).into(avatar);
+
+        System.out.println(user.getUid());
+        System.out.println(userid);
+
+        if (user.getUid() != userid) {
+
+            Query query1 = reference.orderByChild("id").equalTo(userid);
+            query1.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    for (DataSnapshot ds : snapshot.getChildren()) {
+                        String name = "" + ds.child("username").getValue();
+                        String email = "" + ds.child("email").getValue();
+                        String image = "" + ds.child("imageURL").getValue();
+                        nameTV.setText(name);
+                        EmailTV.setText(email);
+
+                        try {
+                            Picasso.get().load(image).into(avatar);
+                        } catch (Exception e) {
+                            Picasso.get().load(R.drawable.ic_add_image).into(avatar);
+                        }
                     }
+
                 }
 
-            }
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
+                }
+            });
 
-            }
-        });
+
+
+        } else if (userid == user.getUid()) {
+
+            Query query = reference.orderByChild("email").equalTo(user.getEmail());
+            query.addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    for (DataSnapshot ds : snapshot.getChildren()) {
+                        String name = "" + ds.child("username").getValue();
+                        String email = "" + ds.child("email").getValue();
+                        String image = "" + ds.child("imageURL").getValue();
+                        nameTV.setText(name);
+                        EmailTV.setText(email);
+
+                        try {
+                            Picasso.get().load(image).into(avatar);
+                        } catch (Exception e) {
+                            Picasso.get().load(R.drawable.ic_add_image).into(avatar);
+                        }
+                    }
+
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+
+                }
+            });
+
+        }
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -226,6 +269,7 @@ public class ProfileActivity extends AppCompatActivity {
         cameraIntent.putExtra(MediaStore.EXTRA_OUTPUT, image_uri);
         startActivityForResult(cameraIntent, IMAGE_PICK_CAMERA_REQUEST_CODE);
     }
+
     private void ShowImagePicDialog() {
         String[] option = {"Camera ", "Gallery"};
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -250,6 +294,7 @@ public class ProfileActivity extends AppCompatActivity {
         });
         builder.create().show();
     }
+
     private void ShowEditprofile() {
         String[] option = {"Edit Profile Picture ", "Edit Name"};
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -259,7 +304,7 @@ public class ProfileActivity extends AppCompatActivity {
             public void onClick(DialogInterface dialog, int which) {
                 if (which == 0) {
                     pd.setMessage("Updating Profile Picture");
-                   ShowImagePicDialog();
+                    ShowImagePicDialog();
                 } else if (which == 1) {
                     pd.setMessage("Updating Name");
                     ShowNameUpdateDialog("username");
@@ -337,7 +382,6 @@ public class ProfileActivity extends AppCompatActivity {
     private void requestCamera() {
         ActivityCompat.requestPermissions(this, camerapermission, CAMERA_REQUEST_CODE);
     }
-
 
 
 }
