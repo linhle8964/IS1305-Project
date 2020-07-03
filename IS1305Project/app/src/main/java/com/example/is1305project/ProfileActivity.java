@@ -72,8 +72,9 @@ public class ProfileActivity extends AppCompatActivity {
     private String camerapermission[];
     private String storagepermission[];
     private Uri image_uri;
-    private String otheruserid;
+    private String userid;
     private Intent intent;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,7 +87,7 @@ public class ProfileActivity extends AppCompatActivity {
         getSupportActionBar().setTitle("Profile");
         database = FirebaseDatabase.getInstance();
         intent = getIntent();
-        String userid = intent.getStringExtra("userid");
+        userid = intent.getStringExtra("userid");
         reference = database.getReference("Users");
         storage = FirebaseStorage.getInstance().getReference();
         camerapermission = new String[]{Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE};
@@ -101,8 +102,8 @@ public class ProfileActivity extends AppCompatActivity {
         System.out.println(user.getUid());
         System.out.println(userid);
 
-        if (user.getUid() != userid) {
-
+        if (user.getUid() .equalsIgnoreCase( userid)==false) {
+fab.setVisibility(View.GONE);
             Query query1 = reference.orderByChild("id").equalTo(userid);
             query1.addValueEventListener(new ValueEventListener() {
                 @Override
@@ -131,8 +132,8 @@ public class ProfileActivity extends AppCompatActivity {
 
 
 
-        } else if (userid == user.getUid()) {
-
+        } else if (userid .equalsIgnoreCase( user.getUid())==true) {
+            fab.setVisibility(View.VISIBLE);
             Query query = reference.orderByChild("email").equalTo(user.getEmail());
             query.addValueEventListener(new ValueEventListener() {
                 @Override
@@ -167,6 +168,23 @@ public class ProfileActivity extends AppCompatActivity {
 
             }
         });
+    }
+
+    @Override
+    public void onBackPressed() {
+        if(userid.equalsIgnoreCase(user.getUid())==false){
+            System.out.println(user.getUid());
+            System.out.println(userid);
+        Intent intent= new Intent(this,MessageActivity.class);
+        intent.putExtra("userid",userid);
+        startActivity(intent);
+        }
+        else if(userid.equalsIgnoreCase(user.getUid())==true){
+            Intent intent= new Intent(this,MainActivity.class);
+            startActivity(intent);
+
+        }
+        super.onBackPressed();
     }
 
     @Override
@@ -232,6 +250,7 @@ public class ProfileActivity extends AppCompatActivity {
                                 @Override
                                 public void onSuccess(Void aVoid) {
                                     pd.dismiss();
+                                    Toast.makeText(getApplicationContext(),"Update Image Successfully",Toast.LENGTH_SHORT).show();
                                 }
 
                             })
@@ -239,10 +258,12 @@ public class ProfileActivity extends AppCompatActivity {
                                         @Override
                                         public void onFailure(@NonNull Exception e) {
                                             pd.dismiss();
+                                            Toast.makeText(getApplicationContext(),"Update Image Failed",Toast.LENGTH_SHORT).show();
                                         }
                                     });
                         } else {
                             pd.dismiss();
+
                         }
                     }
                 })
@@ -250,6 +271,7 @@ public class ProfileActivity extends AppCompatActivity {
                     @Override
                     public void onFailure(@NonNull Exception e) {
                         pd.dismiss();
+                        Toast.makeText(getApplicationContext(),"Update Image Failed",Toast.LENGTH_SHORT).show();
                     }
                 });
     }
@@ -338,12 +360,14 @@ public class ProfileActivity extends AppCompatActivity {
                                 @Override
                                 public void onSuccess(Void aVoid) {
                                     pd.dismiss();
+                                    Toast.makeText(getApplicationContext(),"Update Name Successfully",Toast.LENGTH_SHORT).show();
                                 }
                             })
                             .addOnFailureListener(new OnFailureListener() {
                                 @Override
                                 public void onFailure(@NonNull Exception e) {
                                     pd.dismiss();
+                                    Toast.makeText(getApplicationContext(),"Update Name Failed",Toast.LENGTH_SHORT).show();
                                 }
                             });
                     {
