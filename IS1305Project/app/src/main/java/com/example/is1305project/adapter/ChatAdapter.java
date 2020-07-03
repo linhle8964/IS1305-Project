@@ -152,45 +152,48 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
         final FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
         DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Chats");
 
-        reference.addValueEventListener(new ValueEventListener() {
-            @RequiresApi(api = Build.VERSION_CODES.O)
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                for(DataSnapshot dataSnapshot : snapshot.getChildren()){
-                    Chat chat = dataSnapshot.getValue(Chat.class);
-                    if( chat.getReceiver().equals(firebaseUser.getUid()) && chat.getSender().equals(userid) ||
-                        chat.getReceiver().equals(userid) && chat.getSender().equals(firebaseUser.getUid())){
-                        if(chat.getReceiver().equals(userid) && chat.getSender().equals(firebaseUser.getUid()) ){
-                            userLastMessage = "You: " + chat.getMessage();
-                        }else{
-                            userLastMessage = chat.getMessage();
+        if(firebaseUser != null){
+            reference.addValueEventListener(new ValueEventListener() {
+                @RequiresApi(api = Build.VERSION_CODES.O)
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    for(DataSnapshot dataSnapshot : snapshot.getChildren()){
+                        Chat chat = dataSnapshot.getValue(Chat.class);
+                        if( chat.getReceiver().equals(firebaseUser.getUid()) && chat.getSender().equals(userid) ||
+                                chat.getReceiver().equals(userid) && chat.getSender().equals(firebaseUser.getUid())){
+                            if(chat.getReceiver().equals(userid) && chat.getSender().equals(firebaseUser.getUid()) ){
+                                userLastMessage = "You: " + chat.getMessage();
+                            }else{
+                                userLastMessage = chat.getMessage();
+                            }
+                            userLastMessageTime = chat.getTime();
                         }
-                        userLastMessageTime = chat.getTime();
+
+                        // check if chat have any unseen message. If not change color to black
+                        if(!chat.isIsSeen() && isNotSeen[0] == false && chat.getSender().equals(userid)){
+                            System.out.println(isNotSeen[0]);
+                            username.setTextColor(Color.BLACK);
+                            username.setTypeface(null, Typeface.BOLD);
+                            lastMessage.setTextColor(Color.BLACK);
+                            lastMessage.setTypeface(null, Typeface.BOLD);
+                            isNotSeen[0] = true;
+                        }
                     }
 
-                    // check if chat have any unseen message. If not change color to black
-                    if(!chat.isIsSeen() && isNotSeen[0] == false && chat.getSender().equals(userid)){
-                        System.out.println(isNotSeen[0]);
-                        username.setTextColor(Color.BLACK);
-                        username.setTypeface(null, Typeface.BOLD);
-                        lastMessage.setTextColor(Color.BLACK);
-                        lastMessage.setTypeface(null, Typeface.BOLD);
-                        isNotSeen[0] = true;
-                    }
+                    lastMessage.setText(fixLastMessage(userLastMessage));
+                    lastMessageTime.setText("-  " + convertTime(userLastMessageTime));
+
+                    userLastMessage = "";
+                    userLastMessageTime = 0;
+                    isNotSeen[0] = false;
                 }
 
-                lastMessage.setText(fixLastMessage(userLastMessage));
-                lastMessageTime.setText("-  " + convertTime(userLastMessageTime));
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
 
-                userLastMessage = "";
-                userLastMessageTime = 0;
-                isNotSeen[0] = false;
-            }
+                }
+            });
+        }
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
     }
 }
