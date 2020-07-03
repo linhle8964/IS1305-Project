@@ -44,19 +44,15 @@ public class MainActivity extends AppCompatActivity {
     private CircleImageView profileImage;
     private TextView username;
     private DatabaseReference reference;
-    private FirebaseUser firebaseUser;
-    private Intent intent;
-    private boolean isLogin;
-    private boolean example = true;
+    private FirebaseUser currentUser;
+    private boolean isLogin = false;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        currentUser = FirebaseAuth.getInstance().getCurrentUser();
         bottomNavigationView = (BottomNavigationView) findViewById(R.id.bottom_navigation);
-        firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
-        intent = getIntent();
-        isLogin = intent.getBooleanExtra("isLogin", false);
+
         status("online");
         // set default
         loadFragment(new ChatFragment());
@@ -84,7 +80,7 @@ public class MainActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 User user = snapshot.getValue(User.class);
                 username.setText(user.getUsername());
-                Glide.with(getApplicationContext()).load(Uri.parse(user.getImageURL())).into(profileImage);
+                Glide.with(getApplicationContext()).load(user.getImageURL()).into(profileImage);
             }
 
             @Override
@@ -129,11 +125,10 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(this, "Log Out", Toast.LENGTH_SHORT).show();
                 FirebaseAuth.getInstance().signOut();
                 status("offline");
-                final Intent intent = new Intent(MainActivity.this, StartActivity.class);
                 mGoogleSignInClient.signOut().addOnCompleteListener(this, new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
-                        startActivity(intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
+                        sendUserToStartActivity();
                     }
                 });
 
@@ -160,8 +155,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void status(String status){
-        if(firebaseUser != null){
-            reference = FirebaseDatabase.getInstance().getReference("Users").child(firebaseUser.getUid());
+        if(currentUser != null){
+            reference = FirebaseDatabase.getInstance().getReference("Users").child(currentUser.getUid());
 
             HashMap<String, Object> hashMap = new HashMap<>();
             hashMap.put("status", status);
@@ -170,17 +165,20 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-   /* @Override
-    protected void onResume() {
-        status("active");
-        super.onResume();
+    private void sendUserToStartActivity(){
+        Intent intent = new Intent(this, StartActivity.class);
+        startActivity(intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
     }
 
     @Override
     protected void onPause() {
-        example = false;
-        System.out.println(example);
         super.onPause();
+        status("offline");
+    }
 
-    }*/
+    @Override
+    protected void onResume() {
+        super.onResume();
+        status("online");
+    }
 }

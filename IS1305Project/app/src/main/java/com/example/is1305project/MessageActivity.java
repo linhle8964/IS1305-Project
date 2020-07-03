@@ -20,8 +20,6 @@ import com.bumptech.glide.Glide;
 import com.example.is1305project.adapter.MessageAdapter;
 import com.example.is1305project.model.Chat;
 import com.example.is1305project.model.User;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -30,7 +28,6 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -41,7 +38,7 @@ public class MessageActivity extends AppCompatActivity {
     private CircleImageView profileImage;
     private TextView username;
 
-    private FirebaseUser firebaseUser; // user cua minh
+    private FirebaseUser currentUser; // user cua minh
     private DatabaseReference reference;
     private Intent intent;
     private Toolbar toolbar;
@@ -63,12 +60,12 @@ public class MessageActivity extends AppCompatActivity {
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setTitle("");
-        /*toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 startActivity(new Intent(getApplicationContext(), MainActivity.class).setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
             }
-        });*/
+        });
 
         // show message box
         profileImage = findViewById(R.id.profile_image);
@@ -79,7 +76,8 @@ public class MessageActivity extends AppCompatActivity {
         intent = getIntent();
         userid = intent.getStringExtra("userid");
 
-        firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+        currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        status("online");
         reference = FirebaseDatabase.getInstance().getReference("Users").child(userid);
 
         btnSend.setOnClickListener(new View.OnClickListener() {
@@ -87,7 +85,7 @@ public class MessageActivity extends AppCompatActivity {
             public void onClick(View v) {
                 String message = textSend.getText().toString();
                 if(!message.trim().equals("")){
-                    sendMessage(firebaseUser.getUid(), userid, message);
+                    sendMessage(currentUser.getUid(), userid, message);
                 }else{
                     Toast.makeText(MessageActivity.this, "You can't send empty message", Toast.LENGTH_SHORT).show();;
                 }
@@ -104,7 +102,7 @@ public class MessageActivity extends AppCompatActivity {
                 username.setText(user.getUsername());
                 Glide.with(getApplicationContext()).load(user.getImageURL()).into(profileImage);
 
-                readMessage(firebaseUser.getUid(), userid, user.getImageURL());
+                readMessage(currentUser.getUid(), userid, user.getImageURL());
             }
 
 
@@ -130,7 +128,7 @@ public class MessageActivity extends AppCompatActivity {
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 for (DataSnapshot dataSnapshot : snapshot.getChildren()){
                     Chat chat = dataSnapshot.getValue(Chat.class);
-                    if(chat.getReceiver().equals(firebaseUser.getUid()) && chat.getSender().equals(userid)){
+                    if(chat.getReceiver().equals(currentUser.getUid()) && chat.getSender().equals(userid)){
                         HashMap<String, Object> hashMap = new HashMap<>();
                         hashMap.put("isSeen", true);
                         dataSnapshot.getRef().updateChildren(hashMap);
@@ -158,8 +156,8 @@ public class MessageActivity extends AppCompatActivity {
         reference.child("Chats").push().setValue(hashMap);
 
         // add user to chat fragment
-        addToChatList(firebaseUser.getUid(), userid, currentTime);
-        addToChatList(userid, firebaseUser.getUid(), currentTime);
+        addToChatList(currentUser.getUid(), userid, currentTime);
+        addToChatList(userid, currentUser.getUid(), currentTime);
     }
 
     private void addToChatList(String sender, final String receiver, final Long currentTime){
@@ -216,7 +214,7 @@ public class MessageActivity extends AppCompatActivity {
     }
 
     private void status(String status){
-        reference = FirebaseDatabase.getInstance().getReference("Users").child(firebaseUser.getUid());
+        reference = FirebaseDatabase.getInstance().getReference("Users").child(currentUser.getUid());
 
         HashMap<String, Object> hashMap = new HashMap<>();
         hashMap.put("status", status);
@@ -226,7 +224,7 @@ public class MessageActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-       // status("online");
+        status("online");
     }
 
     @Override
@@ -235,8 +233,10 @@ public class MessageActivity extends AppCompatActivity {
         if(seenListener != null && reference != null    ){
             reference.removeEventListener(seenListener);
         }
-        //status("offline");
+        status("offline");
     }
+
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -256,17 +256,4 @@ public class MessageActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    public void onBackPressed() {
-
-        int count = getSupportFragmentManager().getBackStackEntryCount();
-
-        if (count == 0) {
-            super.onBackPressed();
-            //additional code
-        } else {
-            getSupportFragmentManager().popBackStack();
-        }
-
-    }
 }

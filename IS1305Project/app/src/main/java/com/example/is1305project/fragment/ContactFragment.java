@@ -120,11 +120,11 @@ public class ContactFragment extends Fragment {
                         }
                     }
 
-                    userAdapter = new UserAdapter(getContext(), listUser, false);
+                    userAdapter = new UserAdapter(getContext(), listUser);
                     recyclerView.setAdapter(userAdapter);
                 }else{
                     listUser.clear();
-                    userAdapter = new UserAdapter(getContext(), listUser, false);
+                    userAdapter = new UserAdapter(getContext(), listUser);
                     recyclerView.setAdapter(userAdapter);
                 }
 
@@ -167,7 +167,7 @@ public class ContactFragment extends Fragment {
                         }
                     });
 
-                    userAdapter = new UserAdapter(getContext(), listUser, false);
+                    userAdapter = new UserAdapter(getContext(), listUser);
                     recyclerView.setAdapter(userAdapter);
                 }
 

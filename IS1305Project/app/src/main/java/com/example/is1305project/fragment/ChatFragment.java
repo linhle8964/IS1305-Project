@@ -94,7 +94,7 @@ public class ChatFragment extends Fragment {
                         }
                     }
                 }
-                chatAdapter = new ChatAdapter(getContext(), listUser, true);
+                chatAdapter = new ChatAdapter(getContext(), listUser);
                 recyclerView.setAdapter(chatAdapter);
             }
 
@@ -125,13 +125,15 @@ public class ChatFragment extends Fragment {
                         User user = dataSnapshot.getValue(User.class);
                         assert user != null;
                         assert firebaseUser != null;
+                        assert chatList != null;
                         if(user.getId().equals(chatList.getId()) && !firebaseUser.getUid().equals(user.getId())){
                             listUser.add(user);
                         }
                     }
                 }
                 listUserSave.addAll(listUser);
-                chatAdapter = new ChatAdapter(getContext(), listUser, true);
+                chatAdapter = new ChatAdapter(getContext(), listUser);
+                chatAdapter.notifyDataSetChanged();
                 recyclerView.setAdapter(chatAdapter);
             }
 
@@ -142,4 +144,12 @@ public class ChatFragment extends Fragment {
         });
     }
 
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        chatAdapter = new ChatAdapter(getContext(), listUser);
+        chatAdapter.notifyDataSetChanged();
+        recyclerView.setAdapter(chatAdapter);
+    }
 }
