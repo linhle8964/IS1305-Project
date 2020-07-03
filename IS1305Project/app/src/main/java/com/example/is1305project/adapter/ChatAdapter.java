@@ -44,6 +44,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
 
     String userLastMessage;
     long userLastMessageTime;
+    boolean isNotSeen;
     public ChatAdapter(Context mContext, List<User> listUser){
         this.mContext = mContext;
         this.listUser = listUser;
@@ -59,11 +60,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
     @Override
     public void onBindViewHolder(@NonNull final ViewHolder holder, int position){
         final User user = listUser.get(position);
-        DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Chats");
-        final List<Chat> userChatHistory = new ArrayList<>();
-        final boolean[] isNotSeen = {false};
         holder.linearLayout.setVisibility(View.VISIBLE);
-        final FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
 
         // set active icon
         if(user.getStatus() != null){
@@ -148,7 +145,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
                                     final TextView username){
         userLastMessage = "";
         userLastMessageTime = 0;
-        final boolean[] isNotSeen = {false};
+        isNotSeen = false;
         final FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
         DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Chats");
 
@@ -170,13 +167,12 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
                         }
 
                         // check if chat have any unseen message. If not change color to black
-                        if(!chat.isIsSeen() && isNotSeen[0] == false && chat.getSender().equals(userid)){
-                            System.out.println(isNotSeen[0]);
+                        if(!chat.isIsSeen() && isNotSeen == false && chat.getSender().equals(userid)){
                             username.setTextColor(Color.BLACK);
                             username.setTypeface(null, Typeface.BOLD);
                             lastMessage.setTextColor(Color.BLACK);
                             lastMessage.setTypeface(null, Typeface.BOLD);
-                            isNotSeen[0] = true;
+                            isNotSeen = true;
                         }
                     }
 
@@ -185,7 +181,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
 
                     userLastMessage = "";
                     userLastMessageTime = 0;
-                    isNotSeen[0] = false;
+                    isNotSeen = false;
                 }
 
                 @Override
@@ -194,6 +190,6 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
                 }
             });
         }
-
     }
+
 }

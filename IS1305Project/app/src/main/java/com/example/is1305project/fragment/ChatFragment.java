@@ -1,5 +1,6 @@
 package com.example.is1305project.fragment;
 
+import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 
@@ -20,6 +21,7 @@ import android.widget.EditText;
 import com.example.is1305project.R;
 import com.example.is1305project.adapter.ChatAdapter;
 import com.example.is1305project.adapter.UserAdapter;
+import com.example.is1305project.function.OnBackPressed;
 import com.example.is1305project.model.Chat;
 import com.example.is1305project.model.ChatList;
 import com.example.is1305project.model.User;
@@ -36,7 +38,7 @@ import java.util.Collections;
 import java.util.Comparator;
 
 
-public class ChatFragment extends Fragment {
+public class ChatFragment extends Fragment implements OnBackPressed {
     private RecyclerView recyclerView;
     private EditText search_conversation;
     private ChatAdapter chatAdapter;
@@ -151,5 +153,15 @@ public class ChatFragment extends Fragment {
         chatAdapter = new ChatAdapter(getContext(), listUser);
         chatAdapter.notifyDataSetChanged();
         recyclerView.setAdapter(chatAdapter);
+    }
+
+    @Override
+    public void onBackPressed() {
+        getActivity().getSupportFragmentManager().popBackStack();
+        // exit app
+        Intent exit = new Intent(Intent.ACTION_MAIN);
+        exit.addCategory(Intent.CATEGORY_HOME);
+        exit.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        startActivity(exit);
     }
 }

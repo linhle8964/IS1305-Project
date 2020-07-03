@@ -6,8 +6,8 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 
+import android.content.ClipData;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -17,12 +17,14 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.example.is1305project.fragment.ChatFragment;
 import com.example.is1305project.fragment.ContactFragment;
+import com.example.is1305project.model.Chat;
 import com.example.is1305project.model.User;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.bottomnavigation.BottomNavigationItemView;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -34,6 +36,7 @@ import com.google.firebase.database.ValueEventListener;
 
 
 import java.util.HashMap;
+import java.util.List;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -45,7 +48,7 @@ public class MainActivity extends AppCompatActivity {
     private TextView username;
     private DatabaseReference reference;
     private FirebaseUser currentUser;
-    private boolean isLogin = false;
+    private int unread;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -81,6 +84,32 @@ public class MainActivity extends AppCompatActivity {
                 User user = snapshot.getValue(User.class);
                 username.setText(user.getUsername());
                 Glide.with(getApplicationContext()).load(user.getImageURL()).into(profileImage);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+
+        // set unread number
+        reference = FirebaseDatabase.getInstance().getReference("Chats");
+        reference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                unread = 0;
+                for(DataSnapshot dataSnapshot : snapshot.getChildren()){
+                    Chat chat = dataSnapshot.getValue(Chat.class);
+                    if(chat.getReceiver().equals(currentUser.getUid()) && !chat.isIsSeen()){
+                        unread++;
+                    }
+                }
+                MenuItem item = bottomNavigationView.getMenu().findItem(R.id.navigation_chat);
+                if(unread != 0){
+                    item.setTitle("Chat" + "(" + unread + ")");
+                }else{
+                    item.setTitle("Chat");
+                }
             }
 
             @Override
@@ -152,7 +181,16 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     public void onBackPressed() {
+        tellFragments();
         super.onBackPressed();
+    }
+
+    private void tellFragments(){
+        List<Fragment> fragments = getSupportFragmentManager().getFragments();
+        for(Fragment f : fragments){
+            if(f != null && f instanceof ChatFragment)
+                ((ChatFragment)f).onBackPressed();
+        }
     }
 
     private void status(String status){
