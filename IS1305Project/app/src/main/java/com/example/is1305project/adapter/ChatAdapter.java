@@ -2,6 +2,8 @@ package com.example.is1305project.adapter;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.Build;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -19,6 +21,8 @@ import com.example.is1305project.MessageActivity;
 import com.example.is1305project.R;
 import com.example.is1305project.model.Chat;
 import com.example.is1305project.model.User;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -27,22 +31,22 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.text.Format;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
 public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
     private Context mContext;
     private List<User> listUser;
-    private boolean isChat;
 
-    public ChatAdapter(Context mContext, List<User> listUser, boolean isChat){
+    String userLastMessage;
+    long userLastMessageTime;
+    public ChatAdapter(Context mContext, List<User> listUser){
         this.mContext = mContext;
         this.listUser = listUser;
-        this.isChat = isChat;
     }
 
     @NonNull
@@ -55,52 +59,27 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
     @Override
     public void onBindViewHolder(@NonNull final ViewHolder holder, int position){
         final User user = listUser.get(position);
-        holder.username.setText(user.getUsername());
-        Glide.with(mContext).load(user.getImageURL()).into(holder.profile_image);
         DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Chats");
         final List<Chat> userChatHistory = new ArrayList<>();
-        reference.addValueEventListener(new ValueEventListener() {
-            @RequiresApi(api = Build.VERSION_CODES.O)
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                for(DataSnapshot dataSnapshot : snapshot.getChildren()){
-                    Chat chat = dataSnapshot.getValue(Chat.class);
-                    if(user.getId().equals(chat.getSender()) || user.getId().equals(chat.getReceiver())){
-                        userChatHistory.add(chat);
-                    }
-                }
-                holder.linearLayout.setVisibility(View.VISIBLE);
-                Collections.sort(userChatHistory);
-                if(userChatHistory.size() == 0){
-                    holder.lastMessage.setText("");
-                    holder.lastMessageTime.setText("");
-                }else{
-                    holder.lastMessage.setText(fixLastMessage(userChatHistory.get(userChatHistory.size() - 1).getMessage()));
-                    holder.lastMessageTime.setText(convertTime(userChatHistory.get(userChatHistory.size() - 1).getTime()));
-                }
+        final boolean[] isNotSeen = {false};
+        holder.linearLayout.setVisibility(View.VISIBLE);
+        final FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
 
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
-
+        // set active icon
         if(user.getStatus() != null){
-            if(isChat){
-                if(user.getStatus().equals("online")){
-                    holder.imageOn.setVisibility(View.VISIBLE);
-                    holder.imageOff.setVisibility(View.GONE);
-                }else{
-                    holder.imageOn.setVisibility(View.GONE);
-                    holder.imageOff.setVisibility(View.VISIBLE);
-                }
+            if(user.getStatus().equals("online")){
+                holder.imageOn.setVisibility(View.VISIBLE);
+                holder.imageOff.setVisibility(View.GONE);
             }else{
                 holder.imageOn.setVisibility(View.GONE);
-                holder.imageOff.setVisibility(View.GONE);
+                holder.imageOff.setVisibility(View.VISIBLE);
             }
         }
+
+        // set user image and name
+        holder.username.setText(user.getUsername());
+        Glide.with(mContext).load(user.getImageURL()).into(holder.profile_image);
+        displayLastMessage(user.getId(), holder.lastMessage, holder.lastMessageTime, holder.username);
 
 
         holder.itemView.setOnClickListener(new View.OnClickListener() {
@@ -163,5 +142,55 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
             message = message.substring(0, 24) + "...";
         }
         return message;
+    }
+
+    private void displayLastMessage(final String userid, final TextView lastMessage, final TextView lastMessageTime,
+                                    final TextView username){
+        userLastMessage = "";
+        userLastMessageTime = 0;
+        final boolean[] isNotSeen = {false};
+        final FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+        DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Chats");
+
+        reference.addValueEventListener(new ValueEventListener() {
+            @RequiresApi(api = Build.VERSION_CODES.O)
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                for(DataSnapshot dataSnapshot : snapshot.getChildren()){
+                    Chat chat = dataSnapshot.getValue(Chat.class);
+                    if( chat.getReceiver().equals(firebaseUser.getUid()) && chat.getSender().equals(userid) ||
+                        chat.getReceiver().equals(userid) && chat.getSender().equals(firebaseUser.getUid())){
+                        if(chat.getReceiver().equals(userid) && chat.getSender().equals(firebaseUser.getUid()) ){
+                            userLastMessage = "You: " + chat.getMessage();
+                        }else{
+                            userLastMessage = chat.getMessage();
+                        }
+                        userLastMessageTime = chat.getTime();
+                    }
+
+                    // check if chat have any unseen message. If not change color to black
+                    if(!chat.isIsSeen() && isNotSeen[0] == false && chat.getSender().equals(userid)){
+                        System.out.println(isNotSeen[0]);
+                        username.setTextColor(Color.BLACK);
+                        username.setTypeface(null, Typeface.BOLD);
+                        lastMessage.setTextColor(Color.BLACK);
+                        lastMessage.setTypeface(null, Typeface.BOLD);
+                        isNotSeen[0] = true;
+                    }
+                }
+
+                lastMessage.setText(fixLastMessage(userLastMessage));
+                lastMessageTime.setText("-  " + convertTime(userLastMessageTime));
+
+                userLastMessage = "";
+                userLastMessageTime = 0;
+                isNotSeen[0] = false;
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
     }
 }

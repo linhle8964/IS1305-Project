@@ -121,64 +121,8 @@ public class StartActivity extends AppCompatActivity {
                             // Sign in success, update UI with the signed-in user's information
                             Log.d(TAG, "signInWithCredential:success");
                             final FirebaseUser user = mAuth.getCurrentUser();
-                            final boolean[] checkExist = {false};
-                            DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("Users");
-                            final List<User> listUser = new ArrayList<>();
-                            databaseReference.addValueEventListener(new ValueEventListener() {
-                                @Override
-                                public void onDataChange(@NonNull DataSnapshot snapshot) {
-                                    listUser.clear();
-                                    for(DataSnapshot dataSnapshot : snapshot.getChildren()){
-                                        User myUser = dataSnapshot.getValue(User.class);
-                                        if(user.getUid().equals(myUser.getId())){
-                                            checkExist[0] = true;
-                                        }
-                                    }
-
-                                    if(user != null && checkExist[0] == false){
-                                        String username = user.getDisplayName();
-                                        Uri profileUri = user.getPhotoUrl();
-                                        String phoneNumber = user.getPhoneNumber();
-
-                                        // If the above were null, iterate the provider data
-                                        // and set with the first non null data
-                                        for (UserInfo userInfo : user.getProviderData()) {
-                                            if (username == null && userInfo.getDisplayName() != null) {
-                                                username = userInfo.getDisplayName();
-                                            }
-                                            if (profileUri == null && userInfo.getPhotoUrl() != null) {
-                                                profileUri = userInfo.getPhotoUrl();
-                                            }
-
-                                            if(phoneNumber == null && userInfo.getPhoneNumber() != null){
-                                                phoneNumber = userInfo.getPhoneNumber();
-                                            }
-                                        }
-
-                                        reference = FirebaseDatabase.getInstance().getReference("Users").child(user.getUid());
-                                        HashMap<String, String> hashMap = new HashMap<>();
-                                        hashMap.put("id", user.getUid());
-                                        hashMap.put("username", username);
-                                        hashMap.put("email", user.getEmail());
-                                        hashMap.put("phoneNumber", phoneNumber);
-                                        hashMap.put("status", "offline");
-                                        hashMap.put("imageURL", profileUri.toString());
-                                        reference.setValue(hashMap);
-                                        updateUI(user);
-                                    }else{
-                                        System.out.println("Check: " + checkExist[0]);
-                                        updateUI(user);
-                                    }
-                                }
-
-                                @Override
-                                public void onCancelled(@NonNull DatabaseError error) {
-
-                                }
-                            });
-
-
-
+                            addNewUser(user);
+                            updateUI(user);
                         } else {
                             // If sign in fails, display a message to the user.
                             Log.w(TAG, "signInWithCredential:failure", task.getException());
@@ -193,10 +137,65 @@ public class StartActivity extends AppCompatActivity {
 
     private void updateUI(FirebaseUser user){
         if(user != null){
-            Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+            Intent intent = new Intent(StartActivity.this, MainActivity.class);
             startActivity(intent);
-            finish();
         }
     }
 
+    private void addNewUser(final FirebaseUser user){
+        final boolean[] checkExist = {false};
+        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference("Users");
+        final List<User> listUser = new ArrayList<>();
+        databaseReference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                listUser.clear();
+                for(DataSnapshot dataSnapshot : snapshot.getChildren()){
+                    User myUser = dataSnapshot.getValue(User.class);
+                    if(user.getUid().equals(myUser.getId())){
+                        checkExist[0] = true;
+                    }
+                }
+
+                if(user != null && checkExist[0] == false){
+                    String username = user.getDisplayName();
+                    Uri profileUri = user.getPhotoUrl();
+                    String phoneNumber = user.getPhoneNumber();
+
+                    // If the above were null, iterate the provider data
+                    // and set with the first non null data
+                    for (UserInfo userInfo : user.getProviderData()) {
+                        if (username == null && userInfo.getDisplayName() != null) {
+                            username = userInfo.getDisplayName();
+                        }
+                        if (profileUri == null && userInfo.getPhotoUrl() != null) {
+                            profileUri = userInfo.getPhotoUrl();
+                        }
+
+                        if(phoneNumber == null && userInfo.getPhoneNumber() != null){
+                            phoneNumber = userInfo.getPhoneNumber();
+                        }
+                    }
+
+                    reference = FirebaseDatabase.getInstance().getReference("Users").child(user.getUid());
+                    HashMap<String, String> hashMap = new HashMap<>();
+                    hashMap.put("id", user.getUid());
+                    hashMap.put("username", username);
+                    hashMap.put("email", user.getEmail());
+                    hashMap.put("phoneNumber", phoneNumber);
+                    hashMap.put("status", "offline");
+                    hashMap.put("imageURL", profileUri.toString());
+                    reference.setValue(hashMap);
+                 //   updateUI(user);
+                }else{
+                  //  updateUI(user);
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+    }
 }

@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -21,12 +22,10 @@ import java.util.List;
 public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
     private Context mContext;
     private List<User> listUser;
-    private boolean isChat;
 
-    public UserAdapter(Context mContext, List<User> listUser, boolean isChat){
+    public UserAdapter(Context mContext, List<User> listUser){
         this.mContext = mContext;
         this.listUser = listUser;
-        this.isChat = isChat;
     }
 
     @NonNull
@@ -42,18 +41,10 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
         holder.username.setText(user.getUsername());
         Glide.with(mContext).load(user.getImageURL()).into(holder.profile_image);
 
-        if(isChat){
-            if(user.getStatus().equals("online")){
-                holder.imageOn.setVisibility(View.VISIBLE);
-                holder.imageOff.setVisibility(View.GONE);
-            }else{
-                holder.imageOn.setVisibility(View.GONE);
-                holder.imageOff.setVisibility(View.VISIBLE);
-            }
-        }else{
-            holder.imageOn.setVisibility(View.GONE);
-            holder.imageOff.setVisibility(View.GONE);
-        }
+        holder.lastMessageInfo.setVisibility(View.GONE);
+        holder.imageOn.setVisibility(View.GONE);
+        holder.imageOff.setVisibility(View.GONE);
+
 
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -75,6 +66,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
         public ImageView profile_image;
         private ImageView imageOn;
         private ImageView imageOff;
+        private LinearLayout lastMessageInfo;
 
         public ViewHolder(View itemView){
             super(itemView);
@@ -83,6 +75,7 @@ public class UserAdapter extends RecyclerView.Adapter<UserAdapter.ViewHolder> {
             profile_image = itemView.findViewById(R.id.profile_image);
             imageOn = itemView.findViewById(R.id.image_on);
             imageOff = itemView.findViewById(R.id.image_off);
+            lastMessageInfo = itemView.findViewById(R.id.last_message_info);
         }
     }
 }
