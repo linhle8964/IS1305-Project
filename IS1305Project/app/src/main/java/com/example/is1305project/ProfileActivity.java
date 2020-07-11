@@ -197,7 +197,7 @@ fab.setVisibility(View.GONE);
             case STORAGE_REQUEST_CODE: {
                 if (grantResults.length > 0) {
 
-                    boolean writeStorageAccepted = grantResults[1] == PackageManager.PERMISSION_GRANTED;
+                    boolean writeStorageAccepted = grantResults[0] == PackageManager.PERMISSION_GRANTED;
                     if (writeStorageAccepted) {
                         pickFromGal();
                     } else {
