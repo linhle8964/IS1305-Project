@@ -6,6 +6,9 @@
         android:id="@+id/mnProfile"
         android:title="My Profile" />
     <item
+        android:id="@+id/mnCreateGroup"
+        android:title="Create Group" />
+    <item
         android:id="@+id/mnLogout"
         android:title="Log Out" />
 </menu>

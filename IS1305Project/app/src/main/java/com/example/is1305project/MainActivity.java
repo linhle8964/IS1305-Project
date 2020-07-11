@@ -165,6 +165,10 @@ public class MainActivity extends AppCompatActivity {
                 profileIntent.putExtra("userid",currentUser.getUid());
                 startActivity(profileIntent);
                 return true;
+            case  R.id.mnCreateGroup:
+                Intent groupItent = new Intent(this,CreateGroupNameActivity.class);
+                startActivity(groupItent);
+                return true;
         }
         return super.onOptionsItemSelected(item);
     }
