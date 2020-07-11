@@ -79,7 +79,7 @@ public class MessageActivity extends AppCompatActivity {
         userid = intent.getStringExtra("userid");
 
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
-        status("online");
+
         reference = FirebaseDatabase.getInstance().getReference("Users").child(userid);
 
         btnSend.setOnClickListener(new View.OnClickListener() {
@@ -216,13 +216,6 @@ public class MessageActivity extends AppCompatActivity {
         });
     }
 
-    private void status(String status) {
-        reference = FirebaseDatabase.getInstance().getReference("Users").child(currentUser.getUid());
-
-        HashMap<String, Object> hashMap = new HashMap<>();
-        hashMap.put("status", status);
-        reference.updateChildren(hashMap);
-    }
 
     @Override
     protected void onResume() {

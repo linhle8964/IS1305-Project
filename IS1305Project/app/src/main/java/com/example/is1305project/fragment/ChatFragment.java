@@ -96,8 +96,7 @@ public class ChatFragment extends Fragment implements OnBackPressed {
                         }
                     }
                 }
-                chatAdapter = new ChatAdapter(getContext(), listUser);
-                recyclerView.setAdapter(chatAdapter);
+                chatAdapter.notifyDataSetChanged();
             }
 
             @Override
@@ -135,7 +134,6 @@ public class ChatFragment extends Fragment implements OnBackPressed {
                 }
                 listUserSave.addAll(listUser);
                 chatAdapter = new ChatAdapter(getContext(), listUser);
-                chatAdapter.notifyDataSetChanged();
                 recyclerView.setAdapter(chatAdapter);
             }
 
@@ -158,10 +156,6 @@ public class ChatFragment extends Fragment implements OnBackPressed {
     @Override
     public void onBackPressed() {
         getActivity().getSupportFragmentManager().popBackStack();
-        // exit app
-        Intent exit = new Intent(Intent.ACTION_MAIN);
-        exit.addCategory(Intent.CATEGORY_HOME);
-        exit.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        startActivity(exit);
+
     }
 }
