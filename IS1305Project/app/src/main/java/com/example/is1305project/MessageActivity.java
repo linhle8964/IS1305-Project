@@ -18,6 +18,7 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.example.is1305project.adapter.MessageAdapter;
+import com.example.is1305project.function.Status;
 import com.example.is1305project.model.Chat;
 import com.example.is1305project.model.User;
 import com.google.firebase.auth.FirebaseAuth;
@@ -51,6 +52,7 @@ public class MessageActivity extends AppCompatActivity {
     private RecyclerView recyclerView;
 
     private ValueEventListener seenListener;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -84,10 +86,11 @@ public class MessageActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 String message = textSend.getText().toString();
-                if(!message.trim().equals("")){
+                if (!message.trim().equals("")) {
                     sendMessage(currentUser.getUid(), userid, message);
-                }else{
-                    Toast.makeText(MessageActivity.this, "You can't send empty message", Toast.LENGTH_SHORT).show();;
+                } else {
+                    Toast.makeText(MessageActivity.this, "You can't send empty message", Toast.LENGTH_SHORT).show();
+                    ;
                 }
 
                 textSend.setText("");
@@ -121,14 +124,14 @@ public class MessageActivity extends AppCompatActivity {
         seenMessage(userid);
     }
 
-    private void seenMessage(final String userid){
+    private void seenMessage(final String userid) {
         reference = FirebaseDatabase.getInstance().getReference("Chats");
         seenListener = reference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                for (DataSnapshot dataSnapshot : snapshot.getChildren()){
+                for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
                     Chat chat = dataSnapshot.getValue(Chat.class);
-                    if(chat.getReceiver().equals(currentUser.getUid()) && chat.getSender().equals(userid)){
+                    if (chat.getReceiver().equals(currentUser.getUid()) && chat.getSender().equals(userid)) {
                         HashMap<String, Object> hashMap = new HashMap<>();
                         hashMap.put("isSeen", true);
                         dataSnapshot.getRef().updateChildren(hashMap);
@@ -143,7 +146,7 @@ public class MessageActivity extends AppCompatActivity {
         });
     }
 
-    private void sendMessage(String sender, String receiver, String message){
+    private void sendMessage(String sender, String receiver, String message) {
         DatabaseReference reference = FirebaseDatabase.getInstance().getReference();
         final long currentTime = System.currentTimeMillis();
         HashMap<String, Object> hashMap = new HashMap<>();
@@ -160,7 +163,7 @@ public class MessageActivity extends AppCompatActivity {
         addToChatList(userid, currentUser.getUid(), currentTime);
     }
 
-    private void addToChatList(String sender, final String receiver, final Long currentTime){
+    private void addToChatList(String sender, final String receiver, final Long currentTime) {
         // add user to chat fragment
         final DatabaseReference chatRef = FirebaseDatabase.getInstance().getReference("Chatlist")
                 .child(sender)
@@ -169,12 +172,12 @@ public class MessageActivity extends AppCompatActivity {
         chatRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if(!snapshot.exists()){
+                if (!snapshot.exists()) {
                     HashMap<String, Object> chatListHashMap = new HashMap<>();
                     chatListHashMap.put("id", receiver);
                     chatListHashMap.put("time", currentTime);
                     chatRef.setValue(chatListHashMap);
-                }else{
+                } else {
                     chatRef.child("time").setValue(currentTime);
                 }
             }
@@ -186,7 +189,7 @@ public class MessageActivity extends AppCompatActivity {
         });
     }
 
-    private void readMessage(final String myid, final String userid, final String imageURL){
+    private void readMessage(final String myid, final String userid, final String imageURL) {
         listChat = new ArrayList<>();
 
         reference = FirebaseDatabase.getInstance().getReference("Chats");
@@ -194,10 +197,10 @@ public class MessageActivity extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 listChat.clear();
-                for(DataSnapshot dataSnapshot : snapshot.getChildren()){
+                for (DataSnapshot dataSnapshot : snapshot.getChildren()) {
                     Chat chat = dataSnapshot.getValue(Chat.class);
-                    if(chat.getReceiver().equals(myid) && chat.getSender().equals(userid)
-                    || chat.getReceiver().equals(userid) && chat.getSender().equals(myid) ){
+                    if (chat.getReceiver().equals(myid) && chat.getSender().equals(userid)
+                            || chat.getReceiver().equals(userid) && chat.getSender().equals(myid)) {
                         listChat.add(chat);
                     }
 
@@ -213,7 +216,7 @@ public class MessageActivity extends AppCompatActivity {
         });
     }
 
-    private void status(String status){
+    private void status(String status) {
         reference = FirebaseDatabase.getInstance().getReference("Users").child(currentUser.getUid());
 
         HashMap<String, Object> hashMap = new HashMap<>();
@@ -224,18 +227,17 @@ public class MessageActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        status("online");
+        Status.changeStatus("online", currentUser);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        if(seenListener != null && reference != null    ){
+        if (seenListener != null && reference != null) {
             reference.removeEventListener(seenListener);
         }
-        status("offline");
+        Status.changeStatus("offline", currentUser);
     }
-
 
 
     @Override
@@ -246,10 +248,10 @@ public class MessageActivity extends AppCompatActivity {
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        switch (item.getItemId()){
+        switch (item.getItemId()) {
             case R.id.mn_friend_profile:
                 Intent profileIntent = new Intent(this, ProfileActivity.class);
-profileIntent.putExtra("userid",userid);
+                profileIntent.putExtra("userid", userid);
                 System.out.println(userid);
                 startActivity(profileIntent);
                 finish();

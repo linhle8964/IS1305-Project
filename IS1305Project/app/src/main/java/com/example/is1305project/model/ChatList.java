@@ -1,6 +1,8 @@
 package com.example.is1305project.model;
 
-public class ChatList {
+import java.util.Comparator;
+
+public class ChatList implements Comparable<ChatList> {
     private String id;
     private Long time;
 
@@ -29,4 +31,12 @@ public class ChatList {
         this.time = time;
     }
 
+    @Override
+    public int compareTo(ChatList o) {
+        if(this.time > o.getTime()){
+            return 0;
+        }else{
+            return 1;
+        }
+    }
 }

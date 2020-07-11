@@ -162,17 +162,15 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
                                 userLastMessage = "You: " + chat.getMessage();
                             }else{
                                 userLastMessage = chat.getMessage();
+                                // check if chat have any unseen message. If not change color to black
+                                if(!chat.isIsSeen()){
+                                    username.setTextColor(Color.BLACK);
+                                    username.setTypeface(null, Typeface.BOLD);
+                                    lastMessage.setTextColor(Color.BLACK);
+                                    lastMessage.setTypeface(null, Typeface.BOLD);
+                                }
                             }
                             userLastMessageTime = chat.getTime();
-                        }
-
-                        // check if chat have any unseen message. If not change color to black
-                        if(!chat.isIsSeen() && isNotSeen == false && chat.getSender().equals(userid)){
-                            username.setTextColor(Color.BLACK);
-                            username.setTypeface(null, Typeface.BOLD);
-                            lastMessage.setTextColor(Color.BLACK);
-                            lastMessage.setTypeface(null, Typeface.BOLD);
-                            isNotSeen = true;
                         }
                     }
 

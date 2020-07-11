@@ -9,7 +9,6 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import android.Manifest;
-import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.ContentValues;
 import android.content.DialogInterface;
@@ -19,8 +18,6 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.text.TextUtils;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -28,10 +25,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.example.is1305project.function.Status;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
@@ -49,9 +44,6 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.squareup.picasso.Picasso;
 
-import org.w3c.dom.Text;
-
-import java.security.Key;
 import java.util.HashMap;
 
 public class ProfileActivity extends AppCompatActivity {
@@ -407,5 +399,15 @@ fab.setVisibility(View.GONE);
         ActivityCompat.requestPermissions(this, camerapermission, CAMERA_REQUEST_CODE);
     }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Status.changeStatus("offline", user);
+    }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Status.changeStatus("online", user);
+    }
 }

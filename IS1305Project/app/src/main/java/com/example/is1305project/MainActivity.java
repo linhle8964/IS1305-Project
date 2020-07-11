@@ -6,7 +6,6 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 
-import android.content.ClipData;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
@@ -17,6 +16,7 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.example.is1305project.fragment.ChatFragment;
 import com.example.is1305project.fragment.ContactFragment;
+import com.example.is1305project.function.Status;
 import com.example.is1305project.model.Chat;
 import com.example.is1305project.model.User;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
@@ -24,7 +24,6 @@ import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.google.android.material.bottomnavigation.BottomNavigationItemView;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -35,7 +34,6 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 
-import java.util.HashMap;
 import java.util.List;
 
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -56,7 +54,7 @@ public class MainActivity extends AppCompatActivity {
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
         bottomNavigationView = (BottomNavigationView) findViewById(R.id.bottom_navigation);
 
-        status("online");
+        Status.changeStatus("online", currentUser);
         // set default
         loadFragment(new ChatFragment());
 
@@ -153,7 +151,7 @@ public class MainActivity extends AppCompatActivity {
             case R.id.mnLogout:
                 Toast.makeText(this, "Log Out", Toast.LENGTH_SHORT).show();
                 FirebaseAuth.getInstance().signOut();
-                status("offline");
+                Status.changeStatus("offline", currentUser);
                 mGoogleSignInClient.signOut().addOnCompleteListener(this, new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
@@ -193,16 +191,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void status(String status){
-        if(currentUser != null){
-            reference = FirebaseDatabase.getInstance().getReference("Users").child(currentUser.getUid());
-
-            HashMap<String, Object> hashMap = new HashMap<>();
-            hashMap.put("status", status);
-            reference.updateChildren(hashMap);
-        }
-
-    }
 
     private void sendUserToStartActivity(){
         Intent intent = new Intent(this, StartActivity.class);
@@ -212,12 +200,12 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        status("offline");
+        Status.changeStatus("offline", currentUser);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        status("online");
+        Status.changeStatus("online", currentUser);
     }
 }
