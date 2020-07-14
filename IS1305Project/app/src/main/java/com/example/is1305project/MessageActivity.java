@@ -147,16 +147,21 @@ public class MessageActivity extends AppCompatActivity {
     }
 
     private void sendMessage(String sender, String receiver, String message) {
+        message = message.trim();
         DatabaseReference reference = FirebaseDatabase.getInstance().getReference();
         final long currentTime = System.currentTimeMillis();
+        String key = reference.child("Chats").push().getKey();
         HashMap<String, Object> hashMap = new HashMap<>();
+        hashMap.put("id", key);
         hashMap.put("sender", sender);
         hashMap.put("receiver", receiver);
         hashMap.put("message", message);
         hashMap.put("time", currentTime);
         hashMap.put("isSeen", false);
+        hashMap.put("senderRemove", false);
+        hashMap.put("receiverRemove", false);
 
-        reference.child("Chats").push().setValue(hashMap);
+        reference.child("Chats").child(key).setValue(hashMap);
 
         // add user to chat fragment
         addToChatList(currentUser.getUid(), userid, currentTime);

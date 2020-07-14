@@ -145,7 +145,7 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
                                     final TextView username){
         userLastMessage = "";
         userLastMessageTime = 0;
-        isNotSeen = false;
+        final List<Chat> listChat = new ArrayList<>();
         final FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
         DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Chats");
 
@@ -156,30 +156,34 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ViewHolder> {
                 public void onDataChange(@NonNull DataSnapshot snapshot) {
                     for(DataSnapshot dataSnapshot : snapshot.getChildren()){
                         Chat chat = dataSnapshot.getValue(Chat.class);
-                        if( chat.getReceiver().equals(firebaseUser.getUid()) && chat.getSender().equals(userid) ||
-                                chat.getReceiver().equals(userid) && chat.getSender().equals(firebaseUser.getUid())){
-                            if(chat.getReceiver().equals(userid) && chat.getSender().equals(firebaseUser.getUid()) ){
-                                userLastMessage = "You: " + chat.getMessage();
-                            }else{
-                                userLastMessage = chat.getMessage();
-                                // check if chat have any unseen message. If not change color to black
-                                if(!chat.isIsSeen()){
-                                    username.setTextColor(Color.BLACK);
-                                    username.setTypeface(null, Typeface.BOLD);
-                                    lastMessage.setTextColor(Color.BLACK);
-                                    lastMessage.setTypeface(null, Typeface.BOLD);
+                        listChat.add(chat);
+                        if(chat.getId() != null){
+                            if( chat.getReceiver().equals(firebaseUser.getUid()) && chat.getSender().equals(userid)
+                                    && chat.isReceiverRemove() == false ||
+                                    chat.getReceiver().equals(userid) && chat.getSender().equals(firebaseUser.getUid())
+                                            && chat.isSenderRemove() == false){
+                                if(chat.getReceiver().equals(userid) && chat.getSender().equals(firebaseUser.getUid()) ){
+                                    userLastMessage = "You: " + chat.getMessage();
+                                }else{
+                                    userLastMessage = chat.getMessage();
+                                    // check if chat have any unseen message. If not change color to black
+                                    if(!chat.isIsSeen()){
+                                        username.setTextColor(Color.BLACK);
+                                        username.setTypeface(null, Typeface.BOLD);
+                                        lastMessage.setTextColor(Color.BLACK);
+                                        lastMessage.setTypeface(null, Typeface.BOLD);
+                                    }
                                 }
                             }
-                            userLastMessageTime = chat.getTime();
                         }
-                    }
 
+                    }
+                    userLastMessageTime = listChat.get(listChat.size() - 1).getTime();
                     lastMessage.setText(fixLastMessage(userLastMessage));
                     lastMessageTime.setText("-  " + convertTime(userLastMessageTime));
 
                     userLastMessage = "";
                     userLastMessageTime = 0;
-                    isNotSeen = false;
                 }
 
                 @Override
